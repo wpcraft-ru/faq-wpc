@@ -1,15 +1,28 @@
-# Genesis Simple FAQ
+=== Genesis Simple FAQ ===
+Contributors: studiopress, calvinkoepke, nathanrice, modernnerd
+Tags: genesis, faq
+Requires at least: 4.8
+Tested up to: 5.4
+Stable tag: 0.9.2
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 A simple plugin to handle FAQ layout and interaction with a shortcode.
 
-## DEPRECATION NOTICE
+== DEPRECATION NOTICE ==
 This plugin is now deprecated and will no longer receive feature updates.
 
 Alternatives:
-- Block Editor users: build an FAQ page with the [Atomic Blocks plugin](https://wordpress.org/plugins/atomic-blocks/) using the [Accordion block](https://atomicblocks.com/blocks/accordion-block/).
-- Classic Editor users: check out the wide range of [other FAQ plugins](https://wordpress.org/plugins/search/faq/).
+- Block Editor users: build an FAQ page with the <a href="https://wordpress.org/plugins/atomic-blocks">Atomic Blocks plugin</a> using the <a href="https://atomicblocks.com/blocks/accordion-block/">Accordion block</a>.
+- Classic Editor users: check out the wide range of <a href="https://wordpress.org/plugins/search/faq/">other FAQ plugins</a>.
 
-## Usage
+== Installation ==
+
+1. Upload the plugin files to the `/wp-content/plugins/plugin-name` directory, or install the plugin through the WordPress plugins screen directly.
+1. Activate the plugin through the 'Plugins' screen in WordPress
+
+== Usage ==
+
 Adding a FAQ is easy and relies on custom post types to organize and format your FAQs. To add an FAQ, do the following:
 
 1. Go to Genesis Simple FAQ > All FAQs.
@@ -50,29 +63,25 @@ Enter `-1` to display an infinite number of FAQs.
 
 NOTE: shortcodes should not be entered on consecutive lines, like so:
 
-```
+`
 [gs_faq id="X"]
 [gs_faq id="X"]
 
-```
+`
 
 Instead, shortcodes should be separated by at least one blank line, like so:
 
-```
+`
 [gs_faq id="X"]
 
 [gs_faq id="X"]
 
-```
+`
 
 You can also show FAQs by using the built in widget. Just go to the Appearance > Widgets screen and drag the Genesis Simple FAQ widget to the widget area where you would like it to display. Then, enter a title and select a category to display FAQs from, and click save.
 
 ## Filters
-Currently, there are four filters:
-
-- One to toggle JS animation on or off.
-- Two to control critical CSS output.
-- One to control the default FAQ markup.
+Currently, there are three filters: one to toggle JS animation on or off, one to control critical CSS output, and one to control the default FAQ markup.
 
 ### JS Animation (jQuery Only)
 By default, animation is set to true. This will add a slide animation to showing/hiding the FAQ. To remove JS animation and rely on classes to do your state-changing, add the following to your `functions.php` file:
@@ -80,15 +89,9 @@ By default, animation is set to true. This will add a slide animation to showing
 `add_filter( 'gs_faq_js_animation', '__return_false' );`
 
 ### Critical CSS
-You can opt-out of critical CSS by using the following filter:
-
-```php
-add_filter( 'gs_faq_print_styles', '__return_false' );
-```
-
 You can modify the CSS output using the following filter (styles are minified on the front-end):
 
-```php
+`
 add_filter( 'gs_faq_critical_styles', 'your_custom_function' );
 function your_custom_function( $styles ) {
 
@@ -98,49 +101,28 @@ function your_custom_function( $styles ) {
 		}
 
 		.gs-faq__question {
-			display: none;
-			margin-top: 10px;
-			text-align: left;
-			white-space: normal;
-			width: 100%;
-		}
-
-		.js .gs-faq__question {
 			display: block;
+			text-align: left;
+			width: 100%%;
 		}
 
-		.gs-faq__question:first-of-type {
-			margin-top: 0;
-		}
-
-		.js .gs-faq__answer {
+		.gs-faq__answer {
 			display: none;
 			padding: 5px;
-		}
-
-		.gs-faq__answer p:last-of-type {
-			margin-bottom: 0;
-		}
-
-		.js .gs-faq__answer__heading {
-			display: none;
-		}
-
-		.gs-faq__answer.no-animation.gs-faq--expanded {
-			display: block;
 		}';
 
 	return $styles;
 
 }
-```
+`
 
 ### Default Markup
 The following filter accepts 3 parameters:
 - `$template`: Full string of HTML to output.
 - `$question`: The title of the FAQ, usually a question.
 - `$answer`: The content of the FAQ, usually the answer.
-```php
+
+`
 add_filter( 'gs_faq_template', 'your_custom_function', 10, 3 );
 function your_custom_function( $template, $question, $answer ) {
 
@@ -153,4 +135,26 @@ function your_custom_function( $template, $question, $answer ) {
 	return $template;
 
 }
-```
+`
+
+== Changelog ==
+
+= 0.9.2 =
+
+* Further testing on more recent versions of WordPress
+* Fix messaging issue when using non-Genesis theme
+* Update the code to comply with WordPress coding standards.
+* Add order attribute.
+* Add compatibility for taxonomy with Gutenberg.
+* Process shortcode in answers.
+
+= 0.9.1 =
+
+* Add non-JS support.
+* Add CSS opt out filter.
+* Add category ID to taxonomy page.
+* Set default to show all FAQs.
+
+= 0.9.0 =
+
+* Initial release
