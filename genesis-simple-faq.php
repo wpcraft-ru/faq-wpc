@@ -22,24 +22,44 @@ define( 'GENESIS_SIMPLE_PLUGIN_VERSION', '0.9.2' );
 define( 'GENESIS_SIMPLE_FAQ_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GENESIS_SIMPLE_FAQ_URL', plugins_url( '', __FILE__ ) );
 
-require_once GENESIS_SIMPLE_FAQ_DIR . '/includes/class-genesis-simple-faq.php';
 
-/**
- * Helper function to retrieve the static object without using globals.
- *
- * @since 0.9.0
- */
-function genesis_simple_faq() {
+add_filter('faq_wpc_config', function($config = []){
 
-	static $object;
-
-	if ( null === $object ) {
-		$object = new Genesis_Simple_FAQ();
-	}
-
-	return $object;
-}
+	$config['plugin_version'] = GENESIS_SIMPLE_PLUGIN_VERSION;
+	$config['plugin_dir_path'] = GENESIS_SIMPLE_FAQ_DIR;
+	$config['plugins_url'] = GENESIS_SIMPLE_FAQ_URL;
+	return $config;
+});
 
 
 // Initialize the object on	`plugins_loaded`.
-add_action( 'plugins_loaded', array( Genesis_Simple_FAQ(), 'init' ) );
+add_action( 'plugins_loaded', function(){
+	if( ! current_user_can('administrator')){
+		return;
+	}
+
+	$GLOBALS['faq_wpc'] = [];
+	require_once GENESIS_SIMPLE_FAQ_DIR . '/includes/class-genesis-simple-faq.php';
+
+			/**
+		 * Instance of the plugin assets (loaded in the class).
+		 */
+		// require_once GENESIS_SIMPLE_FAQ_DIR . 'includes/class-genesis-simple-faq-assets.php';
+		// $GLOBALS['faq_wpc']['ass'] = new Genesis_Simple_FAQ_Assets();
+
+		/**
+		 * Instance of the Genesis Simple FAQ custom post type.
+		 */
+		require_once GENESIS_SIMPLE_FAQ_DIR . 'includes/class-genesis-simple-faq-cpt.php';
+
+		/**
+		 * Instance of the Genesis Simple FAQ taxonomy.
+		 */
+		require_once GENESIS_SIMPLE_FAQ_DIR . 'includes/class-genesis-simple-faq-taxonomy.php';
+
+		/**
+		 * Instance of the Genesis Simple FAQ shortcode.
+		 */
+		require_once GENESIS_SIMPLE_FAQ_DIR . 'includes/class-genesis-simple-faq-shortcode.php';
+
+} );

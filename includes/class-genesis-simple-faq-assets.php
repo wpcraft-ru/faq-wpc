@@ -1,4 +1,6 @@
 <?php
+
+namespace WPCraft;
 /**
  * Genesis Simple FAQ assets class.
  *
@@ -23,7 +25,7 @@ class Genesis_Simple_FAQ_Assets {
 		add_action( 'wp_head', array( $this, 'print_critical_styles' ) );
 
 		// Register and maybe load scripts.
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		// add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
 
 	}
 

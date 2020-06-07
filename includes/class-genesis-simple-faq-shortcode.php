@@ -1,4 +1,6 @@
 <?php
+namespace WPCraft;
+
 /**
  * Genesis Simple FAQ shortcode class.
  *
@@ -12,6 +14,11 @@
  */
 class Genesis_Simple_FAQ_Shortcode {
 
+	public static $tax_name;
+	public static $shortcode_name = 'gs_faq';
+	public static $cpt_name;
+	public static $config;
+
 	/**
 	 * Constructor function initiates the shortcode.
 	 *
@@ -19,13 +26,20 @@ class Genesis_Simple_FAQ_Shortcode {
 	 *
 	 * @since 0.9.0
 	 */
-	public function __construct() {
+	public static function init() {
+
+		add_filter('faq_wpc_config', function ($config) {
+			$config['shortcode_name'] = self::$shortcode_name;
+			return $config;
+		});
+
+		self::$config = apply_filters('faq_wpc_config', []);
+		self::$cpt_name = self::$config['cpt_name'];
+		self::$tax_name = self::$config['tax_name'];
+
 
 		// Register shortcode.
-		add_shortcode( 'gs_faq', array( $this, 'shortcode' ) );
-
-		// Conditionally load dependencies.
-		add_action( 'genesis_before', array( $this, 'load_dependencies' ) );
+		add_shortcode( self::$shortcode_name, array( __CLASS__, 'shortcode' ) );
 
 	}
 
@@ -38,7 +52,7 @@ class Genesis_Simple_FAQ_Shortcode {
 	 *
 	 * @since 0.9.0
 	 */
-	public function shortcode( $atts ) {
+	public static function shortcode( $atts ) {
 
 		$a = shortcode_atts(
 			array(
@@ -59,7 +73,7 @@ class Genesis_Simple_FAQ_Shortcode {
 		$args = array(
 			'orderby'        => 'post__in',
 			'order'          => $a['order'],
-			'post_type'      => 'gs_faq',
+			'post_type'      => self::$cpt_name,
 			'post__in'       => $ids,
 			'posts_per_page' => $a['limit'],
 		);
@@ -68,18 +82,18 @@ class Genesis_Simple_FAQ_Shortcode {
 			$args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
 					'terms'    => $cats,
-					'taxonomy' => 'gs_faq_categories',
+					'taxonomy' => self::$tax_name,
 				),
 			);
 		}
 
-		$faqs = new WP_Query( $args );
+		$faqs = new \WP_Query( $args );
 
 		$output = '';
 
 		if ( $faqs->have_posts() ) {
 
-			$output .= '<div class="gs-faq" role="tablist">';
+			$output .= '<div class="faq-wpc-wrapper" role="tablist" itemscope="" itemtype="https://schema.org/FAQPage">';
 
 			while ( $faqs->have_posts() ) {
 				$faqs->the_post();
@@ -87,13 +101,24 @@ class Genesis_Simple_FAQ_Shortcode {
 				$question = get_the_title();
 				$answer   = wpautop( get_the_content() );
 				$template = sprintf(
-					'<button class="gs-faq__question" type="button">%1$s</button><div class="gs-faq__answer no-animation"><h2 class="gs-faq__answer__heading">%1$s</h2>%2$s</div>',
+					'
+					<div class="gs-faq__answer no-animation" itemprop="mainEntity" itemscope="" itemtype="https://schema.org/Question">
+						<div class="gs-faq__answer__heading" itemprop="name">
+							<strong>%1$s</strong>
+						</div>
+						<div itemscope="" itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+							<div itemprop="text">
+								%2$s
+							</div>
+						</div>
+					</div>
+					',
 					esc_html( $question ),
 					do_shortcode( $answer )
 				);
 
 				// Allow filtering of the template markup.
-				$output .= apply_filters( 'gs_faq_template', $template, $question, $answer );
+				$output .= apply_filters( 'faq_template_wpc', $template, $question, $answer );
 			}
 
 			$output .= '</div>';
@@ -106,25 +131,6 @@ class Genesis_Simple_FAQ_Shortcode {
 
 	}
 
-	/**
-	 * Load asset dependencies if shortcode is used.
-	 *
-	 * @since 0.9.0
-	 */
-	public function load_dependencies() {
-
-		if ( ! is_singular() ) {
-			return;
-		}
-
-		global $post;
-		$content = $post->post_content;
-
-		// Load assets if in post content.
-		if ( has_shortcode( $content, 'gs_faq' ) ) {
-			Genesis_Simple_FAQ()->assets->enqueue_scripts();
-		}
-
-	}
-
 }
+
+Genesis_Simple_FAQ_Shortcode::init();

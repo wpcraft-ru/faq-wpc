@@ -1,9 +1,5 @@
 <?php
-/**
- * Genesis Simple FAQ Taxonomy class.
- *
- * @package genesis-simple-faq
- */
+namespace WPCraft;
 
 /**
  * Class to handle taxonomy registering.
@@ -12,31 +8,46 @@
  */
 class Genesis_Simple_FAQ_Taxonomy {
 
+	public static $tax_name = 'faq_tags_wpc';
+	public static $cpt_name;
+	public static $config;
 	/**
 	 * Constructor.
 	 */
-	public function __construct() {
-		add_action( 'init', array( $this, 'register_taxonomy' ) );
-		add_action( 'init', array( $this, 'add_faq_shortcode_column' ) );
+	public static function init() {
+
+		add_filter('faq_wpc_config', function ($config) {
+			$config['tax_name'] = self::$tax_name;
+			return $config;
+		});
+
+		self::$config = apply_filters('faq_wpc_config', []);
+		self::$cpt_name = self::$config['cpt_name'];
+
+		add_action( 'init', array( __CLASS__, 'register_taxonomy' ) );
+		add_action( 'init', array( __CLASS__, 'add_faq_shortcode_column' ) );
 	}
 
 	/**
 	 * Registering the taxonomy.
 	 */
-	public function register_taxonomy() {
+	public static function register_taxonomy() {
+
+		// dd(self::$cpt_name);
+		
 		register_taxonomy(
-			'gs_faq_categories',
-			'gs_faq',
+			self::$tax_name,
+			self::$cpt_name,
 			array(
 				'label'        => __( 'Categories', 'genesis-simple-faq' ),
 				'public'       => false,
 				'rewrite'      => false,
 				'show_ui'      => true,
 				'show_in_rest' => true,
-				'hierarchical' => true,
+				'hierarchical' => false,
 			)
 		);
-		register_taxonomy_for_object_type( 'gs_faq_categories', 'gs_faq' );
+		register_taxonomy_for_object_type( self::$tax_name, self::$cpt_name );
 	}
 
 	/**
@@ -44,47 +55,26 @@ class Genesis_Simple_FAQ_Taxonomy {
 	 *
 	 * @since 0.9.1
 	 */
-	public function add_faq_shortcode_column() {
+	public static function add_faq_shortcode_column() {
 
-		add_filter( 'manage_edit-gs_faq_categories_columns', array( $this, 'faq_shortcode_column_head' ) );
-		add_action( 'manage_gs_faq_categories_custom_column', array( $this, 'faq_shortcode_column_content' ), 10, 3 );
+		add_filter( 'manage_edit-' . self::$tax_name . '_columns', function($columns){
 
-	}
+			$columns['gs_faq'] = __( 'Shortcode', 'genesis-simple-faq' );
+			return $columns;
 
-	/**
-	 * Filter the post column generation to add the FAQ column.
-	 *
-	 * @param  array $columns  Default array of column headings.
-	 * @return array           Updated array of column headings.
-	 *
-	 * @since 0.9.1
-	 */
-	public function faq_shortcode_column_head( $columns ) {
+		} );
 
-		$columns['gs_faq'] = __( 'Shortcode', 'genesis-simple-faq' );
-		return $columns;
+		add_action( 'manage_' . self::$tax_name . '_custom_column', function($content, $column_name, $term_id){
+			if ( 'gs_faq' === $column_name ) {
+				$content = '[gs_faq cat="' . $term_id . '"]';
+			}
+	
+			return $content;
+		}, 10, 3 );
 
 	}
 
-	/**
-	 * Generate the output for the shortcode column.
-	 *
-	 * @param  string $content     String of content.
-	 * @param  string $column_name Title of the column.
-	 * @param  int    $term_id     ID of the current post.
-	 *
-	 * @return string
-	 *
-	 * @since 0.9.1
-	 */
-	public function faq_shortcode_column_content( $content, $column_name, $term_id ) {
 
-		if ( 'gs_faq' === $column_name ) {
-			$content = '[gs_faq cat="' . $term_id . '"]';
-		}
-
-		return $content;
-
-	}
 
 }
+Genesis_Simple_FAQ_Taxonomy::init();

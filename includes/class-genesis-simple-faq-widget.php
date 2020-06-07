@@ -1,4 +1,6 @@
 <?php
+namespace WPCraft;
+
 /**
  * Genesis Simple FAQ widget class.
  *
