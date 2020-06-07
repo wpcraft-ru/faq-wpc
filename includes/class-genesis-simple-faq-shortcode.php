@@ -15,7 +15,7 @@ namespace WPCraft;
 class Genesis_Simple_FAQ_Shortcode {
 
 	public static $tax_name;
-	public static $shortcode_name = 'gs_faq';
+	public static $shortcode_name = 'faq_wpc';
 	public static $cpt_name;
 	public static $config;
 
